@@ -46,20 +46,15 @@ app.get("/users", (req, res) => {
   const name = req.query.name;
   const job = req.query.job;
 
-  // Ensure that both name and job are provided
   if (name && job) {
     let result = findUserByNameAndJob(name, job);
     result = { users_list: result };
     res.send(result);
-  }
-  // If only name is provided, search by name
-  else if (name) {
+  } else if (name) {
     let result = findUserByName(name);
     result = { users_list: result };
     res.send(result);
-  }
-  // If neither name nor job are provided, return all users
-  else {
+  } else {
     res.send(users);
   }
 });
@@ -74,10 +69,14 @@ const findUserByNameAndJob = (name, job) => {
   );
 };
 
+const generateRandomId = () => {
+  return Math.random().toString(36).substring(2, 9);
+};
+
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  addUser(userToAdd);
-  res.send();
+  const newUser = addUser(userToAdd);
+  res.status(201).send(newUser);
 });
 
 app.get("/users/:id", (req, res) => {
@@ -106,13 +105,14 @@ app.delete("/users/:id", (req, res) => {
   const id = req.params.id;
   const result = deleteUser(id);
   if (result) {
-    res.status(200).send(`User with id ${id} deleted successfully.`);
+    res.status(204).send(`User with id ${id} deleted successfully.`);
   } else {
     res.status(404).send("User not found.");
   }
 });
 
 const addUser = (user) => {
+  user.id = generateRandomId();
   users["users_list"].push(user);
   return user;
 };
